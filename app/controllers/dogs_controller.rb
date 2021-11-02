@@ -1,5 +1,6 @@
 class DogsController < ApplicationController
   before_action :set_dog, only: [:show, :edit, :update, :destroy]
+  before_action :prevent_editable_owned_dogs, only: [:create, :edit, :update, :destroy]
 
   # GET /dogs
   # GET /dogs.json
@@ -25,6 +26,7 @@ class DogsController < ApplicationController
   # POST /dogs.json
   def create
     @dog = Dog.new(dog_params)
+    @dog.owner = current_user if current_user
 
     respond_to do |format|
       if @dog.save
@@ -70,6 +72,12 @@ class DogsController < ApplicationController
   # Use callbacks to share common setup or constraints between actions.
   def set_dog
     @dog = Dog.find(params[:id])
+  end
+
+  def prevent_editable_owned_dogs
+    if @dog&.owner && @dog&.owner != current_user
+      redirect_to @dog, notice: 'Dog does not belong to current user and cannot be edited'
+    end
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
