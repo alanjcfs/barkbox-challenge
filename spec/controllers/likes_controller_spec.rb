@@ -1,18 +1,23 @@
 require 'rails_helper'
 
 RSpec.describe LikesController, type: :controller do
+  let(:dog) { create(:dog) }
+  let(:user) { create(:user) }
 
-  describe "GET #create" do
+  describe "POST #create" do
     it "returns http success" do
-      get :create
-      expect(response).to have_http_status(:success)
+      sign_in user
+      post :create, format: :json, params: { dog_id: dog.id }
+      expect(response).to be_successful
     end
   end
 
-  describe "GET #destroy" do
+  describe "DELETE #destroy" do
     it "returns http success" do
-      get :destroy
-      expect(response).to have_http_status(:success)
+      sign_in user
+      like = Like.create!(user_id: user.id, dog_id: dog.id)
+      delete :destroy, format: :json, params: { id: like.id }
+      expect(response).to be_successful
     end
   end
 
